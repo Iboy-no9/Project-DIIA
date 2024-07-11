@@ -1,4 +1,5 @@
 
+{{#if dataEntry}}
 <style>
         body {
             background-color: #f2f2f2;
@@ -70,7 +71,7 @@
     <input type="text" id="userId" name="userId" onblur="fetchStudentName()" required>
     <br>
     <label for="name">Name</label>
-    <input type="text" id="username" name="username">
+    <input type="text" id="username" name="username" readonly>
     <br>
     <label for="purpose">Purpose</label>
     <input type="text" id="userpurpose" name="userpurpose" required>
@@ -96,7 +97,7 @@
     }
 
 
-         function fetchStudentName() {
+  function fetchStudentName() {
   const adno = document.getElementById('userId').value;
   if (adno) {
     fetch(`/admin/getStudentName/${adno}`)
@@ -123,3 +124,159 @@
 }
 
     </script>
+
+{{else if depoEntry}}
+<style>
+        body {
+            background-color: #f2f2f2;
+            font-family: Arial, sans-serif;
+        }
+
+        .entry-form {
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            margin: 50px auto;
+            max-width: 400px;
+            padding: 20px;
+        }
+
+        .entry-form h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .entry-form label {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .entry-form input[type="text"],
+        .entry-form input[type="password"] {
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 16px;
+            padding: 10px;
+            width: 100%;
+        }
+
+        .entry-form button[type="submit"] {
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 3px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            padding: 10px;
+            width: 100%;
+        }
+
+        .entry-form button[type="submit"]:hover {
+            background-color: #3e8e41;
+        }
+         .notification {
+        display: none; /* Hidden by default */
+        position: fixed;
+        top: 150px;
+        left: 78%;
+        transform: translateX(-50%);
+        background-color: #4CAF50; /* Green */
+        color: white;
+        padding: 15px;
+        border-radius: 5px;
+        z-index: 1000; /* Ensure it is on top */
+    }
+    </style>
+   <div id="notification" class="notification"></div>
+<form action="/admin/depo-entry" method="post" class="entry-form" onsubmit="sendLoginNotification(event)">
+    <h1>Data Entry</h1>
+    <label for="adno">Ad.no</label>
+    <input type="text" id="userId" name="userId" onblur="fetchStudentName();fetchStudentName()" required>
+    <br>
+    <label for="name">Name</label>
+    <input type="text" id="username" name="username" readonly>
+    <br>
+    <label for="name">Rent</label>
+    <input type="text" id="rent" name="rent"  onblur="fetchStudentRent()"readonly>
+    <br>
+    <label for="purpose">Deposit</label>
+    <input type="text" id="deposit" name="deposit" required>
+    <br>
+    <button type="submit">Submit</button>
+</form>
+
+
+
+    <script>
+         // Function to show the notification
+    function sendLoginNotification() {
+        var notification = document.getElementById("notification");
+        var username = document.getElementById("username").value;
+        var rent = document.getElementById("rent").value;
+        notification.innerHTML = username +" successfully deposited " + rent + " to his money bank";
+        notification.style.display = "block";
+        
+        // Set a timer to hide the notification after 10 seconds
+        setTimeout(function() {
+            notification.style.display = "none";
+        }, 10000); // 10000 milliseconds = 10 seconds
+    }
+
+  function fetchStudentName() {
+  const adno = document.getElementById('userId').value;
+  if (adno) {
+    fetch(`/admin/getStudentName/${adno}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.name) {
+          document.getElementById('username').value = data.name;
+        } else {
+          alert('Student not found');
+        }
+      })
+      .catch(error => {
+        console.error('Fetch error:', error);
+        alert('Error fetching student name');
+      });
+  } else {
+    alert('Please enter a userId');
+  }
+}
+
+  function fetchStudentRent() {
+  const adno = document.getElementById('userId').value;
+  if (adno) {
+    fetch(`/admin/getStudentRent/${adno}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.rent !== undefined) {  // Check if rent is defined
+          document.getElementById('rent').value = data.rent;
+        } else {
+          alert('Rent not found');
+        }
+      })
+      .catch(error => {
+        console.error('Fetch error:', error);
+        alert('Error fetching student rent');
+      });
+  } else {
+    alert('Please enter a userId');
+  }
+}
+
+    </script>
+
+{{/if}}

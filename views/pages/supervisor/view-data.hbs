@@ -101,8 +101,9 @@
 <section class="pt-5 pb-5">
   <div class="content">
     <a href="/admin/clab"><button><i class="fa-solid fa-arrow-left"></i> Back</button></a>
-     <a href="/admin/data-entry" style="float: right;"><button>Add New Data</button></a>
+     
     {{#if dataPage}}
+    <a href="/admin/data-entry" style="float: right;"><button>Add New Data</button></a>
     <h1>Computer Lab Entry Data</h1>
     <table>
       <thead>
@@ -111,8 +112,8 @@
           <th>Name</th>
           <th>Purpose</th>
           <th>Date</th>
-          <th>Edit Data</th>
           <th>Delete Data</th>
+          {{!-- <th></th> --}}
         </tr>
       </thead>
       <tbody>
@@ -123,7 +124,6 @@
           <td>{{this.username}}</td>
           <td>{{this.userpurpose}}</td>
           <td>{{this.date}}</td>
-          <td><a href="/admin/edit-entry/{{this._adNo}}"><i class="fa-solid fa-edit"></i></a></td>
           <td><a href="/admin/delete-entry/{{this._id}}"><i class="fa-solid fa-trash"></i></a></td>
         </tr>
         {{/each}}
@@ -141,8 +141,8 @@
           <th>Name</th>
           <th>Class</th>
           <th>Rent</th>
-          <th>Deposite</th>
-          <th>Total</th>
+          <th>Deposit</th>
+          <th>Balance</th>
         </tr>
       </thead>
       <tbody>
@@ -152,40 +152,39 @@
           <td>{{this.username}}</td>
           <td>{{this.class}}</td>
           <td>{{this.rent}}</td>
-          <td>{{this.deposite}}</td>
-          <td>{{this.total}}</td>
+          <td>{{this.deposit}}</td>
+          <td>{{this.balance}}</td>
         </tr>
         {{/each}}
       </tbody>
     </table>
 
-    {{else if formPage}}
-    <h1>View Forms</h1>
+    {{else if depoLogs}}
+    <h1>Deposit Logs</h1>
     <table>
       <thead>
         <tr>
-          <th>Title</th>
-          <th>File</th>
-          <th>Show Form</th>
-          <th>Delete Form</th>
-          <th>Last Update Date</th>
+          <th>Ad.No</th>
+          <th>Name</th>
+          <th>Deposit</th>
+          <th>Date</th>
+          <th>Authorized by</th>
         </tr>
       </thead>
       <tbody>
-        {{#each forms}}
+        {{#each logs}}
         <tr>
-          <td>{{this.title}}</td>
-          <td><a href="/images/uploads/forms/{{this.file}}" target="_blank">View File</a></td>
-          <td><a href="/admin/forms/{{this._id}}"><i class="fa-solid fa-eye"></i></a></td>
-          <td><a href="/admin/delete-form/{{this._id}}"><i class="fa-solid fa-trash"></i></a></td>
-          {{!-- <td><a href="/admin/edit-feeds/{{this._id}}"><i class="fa-solid fa-edit"></i></a></td> --}}
+          <td>{{this.userId}}</td>
+          <td>{{this.username}}</td>
+          <td>{{this.deposit}}</td>
           <td>{{this.date}}</td>
+          <td>{{this.supervisor}}</td>
         </tr>
         {{/each}}
       </tbody>
     </table>
 
-    <a href="/admin/add-form"><button>Add New Form</button></a>
+    <a href="/admin/depo-entry"><button>Add New Deposit</button></a>
 
     {{else if notificationPage}}
     <h1>View Notifications</h1>

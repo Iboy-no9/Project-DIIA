@@ -501,6 +501,11 @@ router.get('/change-announcement-status/:id', function (req, res, next) {
 //Computer Lab 
 router.get('/clab', async (req, res) => {
   if (req.session.loggedIn && req.session.user) {
+
+    ctrlHelpers.updateRentBasedOnPurpose().then(()=>{
+      console.log("Rent and Deposit Updation process completed");
+    })
+
     try {
       const supervisor = await db.get().collection(collection.SUPERVISOR_COLLECTION).findOne({ username: req.session.user.username });
       if (supervisor) {
@@ -567,10 +572,23 @@ router.get('/auth/super-logout', (req, res) => {
 
 router.get('/data-entry', async (req, res) => {
   if (req.session.loggedIn && req.session.user) {
+
+    ctrlHelpers.updateRentBasedOnPurpose()
+    .then((message) => {
+        console.log(message); // Successfully updated message
+        // Handle success
+    })
+    .catch((error) => {
+        console.error("Error:", error); // Log the error
+        // Handle error
+    });
+
+    
+
     try {
       const supervisor = await db.get().collection(collection.SUPERVISOR_COLLECTION).findOne({ username: req.session.user.username });
       if (supervisor) {
-        res.render('pages/supervisor/data-entry', { supervisor: true, user: req.session.user, title: 'Computer Lab - DIIA' });
+        res.render('pages/supervisor/data-entry', { supervisor: true,dataEntry: true ,user: req.session.user, title: 'Computer Lab - DIIA' });
       } else {
         res.redirect('/admin/auth/super-login');
       }
@@ -627,6 +645,16 @@ router.post('/data-entry',(req,res)=>{
 
 router.get('/data-base',(req, res)=>{
   if (req.session.loggedIn) {
+    ctrlHelpers.updateRentBasedOnPurpose().then(()=>{
+      console.log("Rent and Deposit Updation process completed");
+    })
+   ctrlHelpers.updateBalanceForAll()
+  .then(() => {
+    console.log("Balance update process completed.");
+  })
+  .catch((error) => {
+    console.error("Balance update failed:", error);
+  });
     db.get().collection(collection.DATABASE_COLLECTIONS).find().toArray()
       .then((dat) => {
         res.render('pages/supervisor/view-data', {
@@ -685,10 +713,65 @@ router.get('/delete-entry/:id', function (req, res, next) {
   }
 });
 
+router.get('/depo-entry', async (req, res) => {
+  if (req.session.loggedIn && req.session.user) {
+    try {
+      const admin = await db.get().collection(collection.SUPERVISOR_COLLECTION).findOne({ username: req.session.user.username });
+      if (admin) {
+        res.render('pages/supervisor/data-entry', { supervisor: true,depoEntry: true ,user: req.session.user, title: 'Computer Lab - DIIA' });
+      } else {
+        res.send('Access Denied');
+      }
+    } catch (err) {
+      console.error(err);
+      res.redirect('/admin/auth/super-login');
+    }
+  } else {
+    res.redirect('/admin/auth/super-login');
+  }
+});
 
+router.get('/getStudentRent/:adno', async (req, res) => {
+  const adno = req.params.adno; // Keep adno as string initially
+  console.log('Searching for userId:', adno); // Log the userId being searched
+  
+  try {
+    // Try querying with adno as string
+    let student = await db.get().collection(collection.DATABASE_COLLECTIONS).findOne({ userId: adno });
+    
+    // If not found, try querying with adno as integer
+    if (!student) {
+      const adnoInt = parseInt(adno);
+      if (!isNaN(adnoInt)) {
+        student = await db.get().collection(collection.DATABASE_COLLECTIONS).findOne({ userId: adnoInt });
+      }
+    }
+    
+    if (student) {
+      res.json({ rent: student.rent }); // Return the rent value
+    } else {
+      res.status(404).json({ error: 'Student not found' });
+    }
+  } catch (err) {
+    console.error('Error fetching student:', err);
+    res.status(500).json({ error: 'An error occurred while fetching student' });
+  }
+});
 
+router.post('/depo-entry',(req,res)=>{
+  console.log(req.body);
+  const user = req.session.user ? req.session.user.username : '';
 
+  req.body.supervisor = user;
 
+  console.log(user);
+  console.log('Supervisor:',req.body.supervisor);
+  ctrlHelpers.addDeposit(req.body,req.body.userId).then((response)=>{
+    setTimeout(() => {
+      res.redirect('/admin/depo-entry'); // Redirect user after data is added
+  }, 300); // 3000 milliseconds = 3 seconds
+})
+  })
 
 
 module.exports = router;
